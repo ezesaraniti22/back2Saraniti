@@ -1,0 +1,99 @@
+<h1>Productos</h1>
+
+<div class="products-page">
+  <!-- 🎛 FILTROS A LA IZQUIERDA -->
+  <aside class="filters">
+    <h3>Filtrar productos</h3>
+
+    <label for="categorySelect">Categoría:</label>
+    <select id="categorySelect">
+      <option value="">Todas</option>
+      {{#each categories}}
+        <option value="{{this}}" {{#ifEquals ../currentQuery this}}selected{{/ifEquals}}>{{this}}</option>
+      {{/each}}
+    </select>
+
+    <label for="sortSelect">Ordenar por precio:</label>
+    <select id="sortSelect">
+      <option value="">Sin orden</option>
+      <option value="asc" {{#ifEquals currentSort "asc"}}selected{{/ifEquals}}>Ascendente</option>
+      <option value="desc" {{#ifEquals currentSort "desc"}}selected{{/ifEquals}}>Descendente</option>
+    </select>
+  </aside>
+
+  <!-- 🛒 PRODUCTOS -->
+  <section class="product-list">
+    <div class="product-container">
+      {{#each products}}
+        <div class="card">
+          <strong>{{this.title}}</strong>
+          <p><b>Precio:</b> ${{this.price}}</p>
+          <p><b>Categoría:</b> {{this.category}}</p>
+          <a href="/products/{{this._id}}">Ver Detalle</a>
+          <button onclick="addToCart('{{this._id}}')">Agregar al Carrito</button>
+        </div>
+      {{/each}}
+    </div>
+
+    <!-- 📄 Paginación -->
+    <div class="pagination">
+      {{#if hasPrevPage}}<a href="/products?page={{prevPage}}&query={{currentQuery}}&sort={{currentSort}}">⬅ Anterior</a>{{/if}}
+      Página {{page}} de {{totalPages}}
+      {{#if hasNextPage}}<a href="/products?page={{nextPage}}&query={{currentQuery}}&sort={{currentSort}}">Siguiente ➡</a>{{/if}}
+    </div>
+  </section>
+</div>
+
+<script>
+  const categorySelect = document.getElementById("categorySelect");
+  const sortSelect = document.getElementById("sortSelect");
+
+  function updateFilters() {
+    const query = categorySelect.value;
+    const sort = sortSelect.value;
+
+    let url = "/products?";
+    if (query) url += `query=${query}&`;
+    if (sort) url += `sort=${sort}`;
+    window.location.href = url;
+  }
+
+  categorySelect.addEventListener("change", updateFilters);
+  sortSelect.addEventListener("change", updateFilters);
+
+  async function addToCart(productId) {
+    let cartId = localStorage.getItem("cartId");
+
+    if (!cartId) {
+      try {
+        const res = await fetch("/api/carts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" }
+        });
+        const data = await res.json();
+        cartId = data.cart._id;
+        localStorage.setItem("cartId", cartId);
+      } catch (err) {
+        alert("No se pudo crear el carrito");
+        return;
+      }
+    }
+
+    try {
+      const res = await fetch(`/api/carts/${cartId}/products/${productId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity: 1 })
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || "Error al agregar al carrito");
+      }
+
+      alert("Producto agregado al carrito");
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  }
+</script>

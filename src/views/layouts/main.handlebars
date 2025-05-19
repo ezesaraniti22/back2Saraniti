@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ecommerce</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    .user-dropdown .user-icon {
+      color: #fff;
+      font-size: 1.4rem;
+      margin-right: 8px;
+      vertical-align: middle;
+      display: inline-block;
+    }
+    .user-dropdown .user-name {
+      color: #fff;
+      font-weight: 500;
+      margin-right: 2px;
+      vertical-align: middle;
+      display: inline-block;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .user-dropdown .dropdown-toggle::after {
+      margin-left: 6px;
+    }
+    .dropdown-menu-end {
+      min-width: 220px;
+      padding: 10px 0;
+    }
+    .dropdown-user-email {
+      font-size: 0.95rem;
+      color: #495057;
+      font-weight: 500;
+      padding: 8px 18px 4px 18px;
+      border-bottom: 1px solid #e9ecef;
+      margin-bottom: 4px;
+      word-break: break-all;
+    }
+    .dropdown-menu .dropdown-item {
+      color: #212529;
+      font-weight: 500;
+      padding: 10px 18px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .dropdown-menu .dropdown-item:hover {
+      background: #dc3545;
+      color: #fff;
+    }
+
+    .text-danger {
+      color: #dc3545 !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR GLOBAL -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/">🏠 Ecommerce</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/products">📦 Productos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" onclick="goToCart()">🛒 Mi Carrito</a>
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+          {{#if user}}
+            <li class="nav-item dropdown user-dropdown">
+              <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="user-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16"><path d="M11 10a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/><path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM4.285 12.433A5.978 5.978 0 0 0 8 13c1.306 0 2.518-.418 3.515-1.125C11.356 11.07 9.805 10 8 10s-3.356 1.07-3.715 2.433z"/></svg></span>
+                <span class="user-name">
+                  {{#if user.first_name}}{{user.first_name}} {{user.last_name}}{{else}}{{user.email}}{{/if}}
+                </span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                <li><div class="dropdown-user-email">{{user.email}}</div></li>
+                <li><a class="dropdown-item text-danger" href="#" onclick="logout()">Cerrar Sesión</a></li>
+              </ul>
+            </li>
+          {{else}}
+            <li class="nav-item">
+              <a class="nav-link" href="/login">🔑 Iniciar Sesión</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/register">📝 Registrarse</a>
+            </li>
+          {{/if}}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  {{{body}}}
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function goToCart() {
+      let cartId = localStorage.getItem("cartId");
+
+      if (!cartId) {
+        try {
+          const res = await fetch("/api/carts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+          });
+          const data = await res.json();
+          cartId = data.cart._id;
+          localStorage.setItem("cartId", cartId);
+        } catch (err) {
+          alert("No se pudo crear el carrito");
+          return;
+        }
+      }
+
+      window.location.href = `/carts/${cartId}`;
+    }
+
+    async function logout() {
+      try {
+        const response = await fetch('/api/sessions/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          window.location.href = '/login';
+        } else {
+          alert('Error al cerrar sesión');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al cerrar sesión');
+      }
+    }
+  </script>
+</body>
+</html>

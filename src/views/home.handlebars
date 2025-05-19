@@ -1,0 +1,44 @@
+<h1>Bienvenido a la tienda</h1>
+
+<div class="product-container">
+  <div class="card">
+    <strong>Productos</strong>
+    <p>Ver todos los productos disponibles</p>
+    <button onclick="goToProducts()">Ver Productos</button>
+  </div>
+
+  <div class="card">
+    <strong>Carrito</strong>
+    <p>Ver los productos de tu carrito</p>
+    <button onclick="goToCart()">Ir al Carrito</button>
+  </div>
+</div>
+
+<script>
+  function goToProducts() {
+    window.location.href = "/products";
+  }
+
+  async function goToCart() {
+    let cartId = localStorage.getItem("cartId");
+
+    if (!cartId) {
+      // Crear nuevo carrito automáticamente
+      try {
+        const res = await fetch("/api/carts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" }
+        });
+        const data = await res.json();
+        cartId = data.cart._id;
+        localStorage.setItem("cartId", cartId);
+        console.log("🛒 Carrito creado:", cartId);
+      } catch (err) {
+        alert("Error al crear carrito");
+        return;
+      }
+    }
+
+    window.location.href = `/carts/${cartId}`;
+  }
+</script>

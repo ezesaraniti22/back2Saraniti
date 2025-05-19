@@ -1,0 +1,24 @@
+<h1>Mi Carrito</h1>
+
+<div class="product-container">
+  {{#each products}}
+    <div class="card">
+      <strong>{{this.product.title}}</strong>
+      <p><b>Cantidad:</b> {{this.quantity}}</p>
+      <p><b>Precio:</b> ${{this.product.price}}</p>
+      <button onclick="removeFromCart('{{this.product._id}}')">Eliminar</button>
+    </div>
+  {{/each}}
+</div>
+
+
+<script>
+  function removeFromCart(productId) {
+    const cartId = localStorage.getItem("cartId") || "ID_CARRITO_DUMMY";
+    fetch(`/api/carts/${cartId}/products/${productId}`, {
+      method: "DELETE"
+    }).then(res => {
+      if (res.ok) location.reload();
+    });
+  }
+</script>
