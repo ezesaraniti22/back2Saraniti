@@ -118,7 +118,7 @@
           cartId = data.cart._id;
           localStorage.setItem("cartId", cartId);
         } catch (err) {
-          alert("No se pudo crear el carrito");
+          showToast('No se pudo crear el carrito', 'error');
           return;
         }
       }

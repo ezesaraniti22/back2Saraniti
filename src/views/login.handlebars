@@ -101,14 +101,14 @@ document.getElementById('forgotPasswordForm').addEventListener('submit', async (
         const data = await response.json();
         
         if (response.ok) {
-            alert('Se ha enviado un correo con las instrucciones para recuperar tu contraseña');
+            showToast('Se ha enviado un correo con las instrucciones para recuperar tu contraseña', 'success');
             const modal = bootstrap.Modal.getInstance(document.getElementById('forgotPasswordModal'));
             modal.hide();
         } else {
-            alert(data.error || 'Error al procesar la solicitud');
+            showToast(data.error || 'Error al procesar la solicitud', 'error');
         }
     } catch (error) {
-        alert('Error al procesar la solicitud');
+        showToast('Error al procesar la solicitud', 'error');
     }
 });
 </script> 

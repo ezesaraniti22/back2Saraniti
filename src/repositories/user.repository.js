@@ -122,7 +122,7 @@ class UserRepository {
                 throw new Error('La nueva contraseña no puede ser igual a la anterior');
             }
 
-            user.password = createHash(newPassword);
+            user.password = newPassword;
             user.resetPasswordToken = undefined;
             user.resetPasswordExpires = undefined;
             await user.save();
