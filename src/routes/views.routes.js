@@ -1,9 +1,10 @@
-const express = require("express");
-const Product = require("../models/Product");
-const Cart = require("../models/Cart");
-const passport = require('passport');
-const jwt = require('jsonwebtoken');
-const User = require('../models/user.model');
+import express from 'express';
+import Product from '../models/Product.js';
+import Cart from '../models/Cart.js';
+import passport from 'passport';
+import jwt from 'jsonwebtoken';
+import User from '../models/user.model.js';
+import { JWT_SECRET } from '../config/config.js';
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ const isAuthenticated = async (req, res, next) => {
             return res.redirect('/login');
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, JWT_SECRET);
         const user = await User.findById(decoded.id).select('-password');
         
         if (!user) {
@@ -38,7 +39,7 @@ const setUserLocals = async (req, res, next) => {
         const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
         
         if (token) {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const decoded = jwt.verify(token, JWT_SECRET);
             const user = await User.findById(decoded.id).select('-password');
             if (user) {
                 res.locals.user = user.toObject();
@@ -132,4 +133,4 @@ router.get("/realtimeproducts", isAuthenticated, async (req, res) => {
     res.render("realtimeProducts", { user: res.locals.user });
 });
 
-module.exports = router;
+export default router;

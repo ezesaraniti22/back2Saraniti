@@ -1,10 +1,11 @@
-const passport = require('passport');
-const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
-const { Strategy: LocalStrategy } = require('passport-local');
-const User = require('../models/user.model');
+import passport from 'passport';
+import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
+import { Strategy as LocalStrategy } from 'passport-local';
+import User from '../models/user.model.js';
+import { JWT_SECRET } from './config.js';
 
-// Estrategia Local
-passport.use(new LocalStrategy(
+// Middleware para la estrategia local
+const localStrategy = new LocalStrategy(
     {
         usernameField: 'email',
         passwordField: 'password'
@@ -26,13 +27,13 @@ passport.use(new LocalStrategy(
             return done(error);
         }
     }
-));
+);
 
-// Estrategia JWT
-passport.use(new JwtStrategy(
+// Middleware para la estrategia JWT
+const jwtStrategy = new JwtStrategy(
     {
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-        secretOrKey: process.env.JWT_SECRET
+        secretOrKey: JWT_SECRET
     },
     async (jwtPayload, done) => {
         try {
@@ -45,6 +46,22 @@ passport.use(new JwtStrategy(
             return done(error, false);
         }
     }
-));
+);
 
-module.exports = passport; 
+// Middleware para verificar rol de administrador
+export const isAdmin = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        next();
+    } else {
+        res.status(403).json({ message: 'Acceso denegado. Se requieren privilegios de administrador.' });
+    }
+};
+
+// Middleware para verificar autenticación
+export const isAuthenticated = passport.authenticate('jwt', { session: false });
+
+// Configurar estrategias
+passport.use(localStrategy);
+passport.use(jwtStrategy);
+
+export default passport; 

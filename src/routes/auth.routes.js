@@ -1,11 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const passport = require('passport');
-const jwt = require('jsonwebtoken');
-const User = require('../models/user.model');
+import express from 'express';
+import passport from 'passport';
+import jwt from 'jsonwebtoken';
+import User from '../models/user.model.js';
+import { isAuthenticated, isAdmin } from '../config/passport.config.js';
+import { JWT_SECRET, NODE_ENV } from '../config/config.js';
 
-// Middleware para verificar el token JWT
-const authenticateJWT = passport.authenticate('jwt', { session: false });
+const router = express.Router();
 
 // Registro de usuario
 router.post('/register', async (req, res) => {
@@ -39,14 +39,14 @@ router.post('/register', async (req, res) => {
 router.post('/login', passport.authenticate('local', { session: false }), (req, res) => {
     const token = jwt.sign(
         { id: req.user._id, email: req.user.email, role: req.user.role },
-        process.env.JWT_SECRET,
+        JWT_SECRET,
         { expiresIn: '24h' }
     );
 
     // Establecer la cookie
     res.cookie('token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: NODE_ENV === 'production',
         maxAge: 24 * 60 * 60 * 1000 // 24 horas
     });
 
@@ -63,7 +63,7 @@ router.post('/login', passport.authenticate('local', { session: false }), (req, 
 });
 
 // Ruta para obtener el usuario actual
-router.get('/current', passport.authenticate('jwt', { session: false }), (req, res) => {
+router.get('/current', isAuthenticated, (req, res) => {
     res.json({
         user: {
             id: req.user._id,
@@ -81,4 +81,9 @@ router.post('/logout', (req, res) => {
     res.json({ message: 'Sesión cerrada exitosamente' });
 });
 
-module.exports = router; 
+// Ruta protegida de ejemplo para administradores
+router.get('/admin', isAuthenticated, isAdmin, (req, res) => {
+    res.json({ message: 'Acceso a ruta de administrador exitoso' });
+});
+
+export default router; 

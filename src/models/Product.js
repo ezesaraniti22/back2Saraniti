@@ -1,5 +1,4 @@
-const mongoose = require("mongoose");
-const mongoosePaginate = require("mongoose-paginate-v2");
+import mongoose from 'mongoose';
 
 // Esquema del producto
 const productSchema = new mongoose.Schema({
@@ -36,7 +35,36 @@ const productSchema = new mongoose.Schema({
   timestamps: true
 });
 
-productSchema.plugin(mongoosePaginate);
+// Método estático para paginación
+productSchema.statics.paginate = async function(query, options) {
+  const { page = 1, limit = 10, sort } = options;
+  const skip = (page - 1) * limit;
+
+  const [docs, total] = await Promise.all([
+    this.find(query)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    this.countDocuments(query)
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
+  const hasPrevPage = page > 1;
+  const hasNextPage = page < totalPages;
+
+  return {
+    docs,
+    totalPages,
+    page: Number(page),
+    hasPrevPage,
+    hasNextPage,
+    prevPage: hasPrevPage ? page - 1 : null,
+    nextPage: hasNextPage ? page + 1 : null,
+    total
+  };
+};
 
 const Product = mongoose.model("Product", productSchema);
-module.exports = Product;
+
+export default Product;

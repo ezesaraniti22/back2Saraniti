@@ -1,21 +1,31 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const { Server } = require("socket.io");
-const handlebars = require("express-handlebars");
-const path = require("path");
-const passport = require('passport');
-const cookieParser = require('cookie-parser');
-require('dotenv').config();
-require('./src/config/passport.config');
+import express from "express";
+import mongoose from "mongoose";
+import { Server } from "socket.io";
+import handlebars from "express-handlebars";
+import path from "path";
+import { fileURLToPath } from 'url';
+import passport from 'passport';
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
 
-// Rutas
-const productRoutes = require("./src/routes/products.routes");
-const cartRoutes = require("./src/routes/carts.routes");
-const viewsRoutes = require("./src/routes/views.routes");
-const authRoutes = require("./src/routes/auth.routes");
+// Configuración de variables de entorno
+dotenv.config();
 
-// Modelos
-const Product = require("./src/models/Product");
+// Configuración de __dirname para ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Importar rutas
+import productRoutes from "./src/routes/products.routes.js";
+import cartRoutes from "./src/routes/carts.routes.js";
+import viewsRoutes from "./src/routes/views.routes.js";
+import authRoutes from "./src/routes/auth.routes.js";
+
+// Importar configuración de Passport
+import './src/config/passport.config.js';
+
+// Importar modelos
+import Product from "./src/models/Product.js";
 
 const app = express();
 const PORT = process.env.PORT || 8080;
