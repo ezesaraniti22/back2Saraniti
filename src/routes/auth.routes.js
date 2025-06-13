@@ -1,89 +1,34 @@
-import express from 'express';
-import passport from 'passport';
-import jwt from 'jsonwebtoken';
-import User from '../models/user.model.js';
-import { isAuthenticated, isAdmin } from '../config/passport.config.js';
-import { JWT_SECRET, NODE_ENV } from '../config/config.js';
+import { Router } from 'express';
+import { register, login, logout, current } from '../controllers/auth.controller.js';
 
-const router = express.Router();
+const router = Router();
 
-// Registro de usuario
-router.post('/register', async (req, res) => {
+// Rutas de autenticación
+router.post('/register', register);
+router.post('/login', login);
+router.post('/logout', logout);
+router.get('/current', current);
+
+// Solicitar recuperación de contraseña
+router.post('/forgot-password', async (req, res) => {
     try {
-        const { first_name, last_name, email, age, password } = req.body;
-        
-        // Verificar si el usuario ya existe
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'El email ya está registrado' });
-        }
-
-        // Crear nuevo usuario
-        const user = new User({
-            first_name,
-            last_name,
-            email,
-            age,
-            password
-        });
-
-        await user.save();
-
-        res.status(201).json({ message: 'Usuario registrado exitosamente' });
+        const { email } = req.body;
+        await userRepository.requestPasswordReset(email);
+        res.json({ message: 'Se ha enviado un correo con las instrucciones para recuperar tu contraseña' });
     } catch (error) {
-        res.status(500).json({ message: 'Error al registrar usuario', error: error.message });
+        res.status(400).json({ error: error.message });
     }
 });
 
-// Login de usuario
-router.post('/login', passport.authenticate('local', { session: false }), (req, res) => {
-    const token = jwt.sign(
-        { id: req.user._id, email: req.user.email, role: req.user.role },
-        JWT_SECRET,
-        { expiresIn: '24h' }
-    );
-
-    // Establecer la cookie
-    res.cookie('token', token, {
-        httpOnly: true,
-        secure: NODE_ENV === 'production',
-        maxAge: 24 * 60 * 60 * 1000 // 24 horas
-    });
-
-    res.json({
-        token,
-        user: {
-            id: req.user._id,
-            first_name: req.user.first_name,
-            last_name: req.user.last_name,
-            email: req.user.email,
-            role: req.user.role
-        }
-    });
-});
-
-// Ruta para obtener el usuario actual
-router.get('/current', isAuthenticated, (req, res) => {
-    res.json({
-        user: {
-            id: req.user._id,
-            first_name: req.user.first_name,
-            last_name: req.user.last_name,
-            email: req.user.email,
-            role: req.user.role
-        }
-    });
-});
-
-// Ruta para cerrar sesión
-router.post('/logout', (req, res) => {
-    res.clearCookie('token');
-    res.json({ message: 'Sesión cerrada exitosamente' });
-});
-
-// Ruta protegida de ejemplo para administradores
-router.get('/admin', isAuthenticated, isAdmin, (req, res) => {
-    res.json({ message: 'Acceso a ruta de administrador exitoso' });
+// Resetear contraseña
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { token, newPassword } = req.body;
+        await userRepository.resetPassword(token, newPassword);
+        res.json({ message: 'Contraseña actualizada exitosamente' });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
 });
 
 export default router; 

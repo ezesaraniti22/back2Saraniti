@@ -1,7 +1,7 @@
 import passport from 'passport';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import { Strategy as LocalStrategy } from 'passport-local';
-import User from '../models/user.model.js';
+import User from '../models/User.js';
 import { JWT_SECRET } from './config.js';
 
 // Middleware para la estrategia local

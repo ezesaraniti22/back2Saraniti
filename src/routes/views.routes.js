@@ -3,7 +3,7 @@ import Product from '../models/Product.js';
 import Cart from '../models/Cart.js';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
-import User from '../models/user.model.js';
+import User from '../models/User.js';
 import { JWT_SECRET } from '../config/config.js';
 
 const router = express.Router();
@@ -131,6 +131,22 @@ router.get("/carts/:cid", isAuthenticated, async (req, res) => {
 
 router.get("/realtimeproducts", isAuthenticated, async (req, res) => {
     res.render("realtimeProducts", { user: res.locals.user });
+});
+
+// Ruta para la vista de reset de contraseña
+router.get('/reset-password/:token', (req, res) => {
+    res.render('reset-password');
+});
+
+// Vista de carrito del usuario autenticado
+router.get("/cart", isAuthenticated, async (req, res) => {
+    const user = res.locals.user;
+    if (!user || !user.cart) {
+        return res.render("cart", { products: [] });
+    }
+    const cart = await Cart.findById(user.cart).populate("products.product").lean();
+    if (!cart) return res.render("cart", { products: [] });
+    res.render("cart", { products: cart.products, user });
 });
 
 export default router;

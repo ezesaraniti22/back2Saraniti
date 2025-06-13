@@ -1,0 +1,55 @@
+/* Estilos generales */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Estilos para las tarjetas de productos */
+.product-card {
+    transition: transform 0.2s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Estilos para el carrito */
+.cart-item {
+    border-bottom: 1px solid #eee;
+    padding: 1rem 0;
+}
+
+/* Estilos para formularios */
+.form-container {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Estilos para mensajes de alerta */
+.alert {
+    margin-top: 1rem;
+}
+
+/* Estilos para botones */
+.btn {
+    margin: 0.25rem;
+}
+
+/* Estilos para la navegación */
+.navbar {
+    margin-bottom: 2rem;
+}
+
+/* Estilos para el footer */
+footer {
+    margin-top: auto;
+} 

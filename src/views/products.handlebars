@@ -1,48 +1,50 @@
-<h1>Productos</h1>
+<main class="container mt-4">
+  <h1>Productos</h1>
 
-<div class="products-page">
-  <!-- 🎛 FILTROS A LA IZQUIERDA -->
-  <aside class="filters">
-    <h3>Filtrar productos</h3>
+  <div class="products-page">
+    <!-- 🎛 FILTROS A LA IZQUIERDA -->
+    <aside class="filters">
+      <h3>Filtrar productos</h3>
 
-    <label for="categorySelect">Categoría:</label>
-    <select id="categorySelect">
-      <option value="">Todas</option>
-      {{#each categories}}
-        <option value="{{this}}" {{#ifEquals ../currentQuery this}}selected{{/ifEquals}}>{{this}}</option>
-      {{/each}}
-    </select>
+      <label for="categorySelect">Categoría:</label>
+      <select id="categorySelect">
+        <option value="">Todas</option>
+        {{#each categories}}
+          <option value="{{this}}" {{#ifEquals ../currentQuery this}}selected{{/ifEquals}}>{{this}}</option>
+        {{/each}}
+      </select>
 
-    <label for="sortSelect">Ordenar por precio:</label>
-    <select id="sortSelect">
-      <option value="">Sin orden</option>
-      <option value="asc" {{#ifEquals currentSort "asc"}}selected{{/ifEquals}}>Ascendente</option>
-      <option value="desc" {{#ifEquals currentSort "desc"}}selected{{/ifEquals}}>Descendente</option>
-    </select>
-  </aside>
+      <label for="sortSelect">Ordenar por precio:</label>
+      <select id="sortSelect">
+        <option value="">Sin orden</option>
+        <option value="asc" {{#ifEquals currentSort "asc"}}selected{{/ifEquals}}>Ascendente</option>
+        <option value="desc" {{#ifEquals currentSort "desc"}}selected{{/ifEquals}}>Descendente</option>
+      </select>
+    </aside>
 
-  <!-- 🛒 PRODUCTOS -->
-  <section class="product-list">
-    <div class="product-container">
-      {{#each products}}
-        <div class="card">
-          <strong>{{this.title}}</strong>
-          <p><b>Precio:</b> ${{this.price}}</p>
-          <p><b>Categoría:</b> {{this.category}}</p>
-          <a href="/products/{{this._id}}">Ver Detalle</a>
-          <button onclick="addToCart('{{this._id}}')">Agregar al Carrito</button>
-        </div>
-      {{/each}}
-    </div>
+    <!-- 🛒 PRODUCTOS -->
+    <section class="product-list">
+      <div class="product-container row">
+        {{#each products}}
+          <div class="card col-md-3 m-2 p-2">
+            <strong>{{this.title}}</strong>
+            <p><b>Precio:</b> ${{this.price}}</p>
+            <p><b>Categoría:</b> {{this.category}}</p>
+            <a href="/products/{{this._id}}" class="btn btn-outline-secondary btn-sm mb-2">Ver Detalle</a>
+            <button class="btn btn-primary w-100" onclick="addToCart('{{this._id}}')">Agregar al Carrito</button>
+          </div>
+        {{/each}}
+      </div>
 
-    <!-- 📄 Paginación -->
-    <div class="pagination">
-      {{#if hasPrevPage}}<a href="/products?page={{prevPage}}&query={{currentQuery}}&sort={{currentSort}}">⬅ Anterior</a>{{/if}}
-      Página {{page}} de {{totalPages}}
-      {{#if hasNextPage}}<a href="/products?page={{nextPage}}&query={{currentQuery}}&sort={{currentSort}}">Siguiente ➡</a>{{/if}}
-    </div>
-  </section>
-</div>
+      <!-- 📄 Paginación -->
+      <div class="pagination mt-4">
+        {{#if hasPrevPage}}<a href="/products?page={{prevPage}}&query={{currentQuery}}&sort={{currentSort}}">⬅ Anterior</a>{{/if}}
+        Página {{page}} de {{totalPages}}
+        {{#if hasNextPage}}<a href="/products?page={{nextPage}}&query={{currentQuery}}&sort={{currentSort}}">Siguiente ➡</a>{{/if}}
+      </div>
+    </section>
+  </div>
+</main>
 
 <script>
   const categorySelect = document.getElementById("categorySelect");
@@ -74,7 +76,7 @@
         cartId = data.cart._id;
         localStorage.setItem("cartId", cartId);
       } catch (err) {
-        alert("No se pudo crear el carrito");
+        showToast("No se pudo crear el carrito", "error");
         return;
       }
     }
@@ -91,9 +93,9 @@
         throw new Error(errData.message || "Error al agregar al carrito");
       }
 
-      alert("Producto agregado al carrito");
+      showToast("Producto agregado al carrito", "success");
     } catch (err) {
-      alert("Error: " + err.message);
+      showToast("Error: " + err.message, "error");
     }
   }
 </script>

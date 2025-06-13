@@ -71,7 +71,7 @@
             <a class="nav-link" href="/products">📦 Productos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" onclick="goToCart()">🛒 Mi Carrito</a>
+            <a class="nav-link" href="/cart">🛒 Mi Carrito</a>
           </li>
         </ul>
         <ul class="navbar-nav">
@@ -85,7 +85,7 @@
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                 <li><div class="dropdown-user-email">{{user.email}}</div></li>
-                <li><a class="dropdown-item text-danger" href="#" onclick="logout()">Cerrar Sesión</a></li>
+                <li><a class="dropdown-item text-danger" href="#" onclick="handleLogout()">Cerrar Sesión</a></li>
               </ul>
             </li>
           {{else}}
@@ -126,25 +126,77 @@
       window.location.href = `/carts/${cartId}`;
     }
 
-    async function logout() {
-      try {
-        const response = await fetch('/api/sessions/logout', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.ok) {
-          window.location.href = '/login';
-        } else {
-          alert('Error al cerrar sesión');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Error al cerrar sesión');
+    function showToast(message, type = 'info') {
+      const toastId = `toast-${Date.now()}`;
+      const colors = {
+        success: 'bg-success text-white',
+        error: 'bg-danger text-white',
+        info: 'bg-info text-dark',
+        warning: 'bg-warning text-dark'
+      };
+      const colorClass = colors[type] || colors.info;
+      const toastHtml = `
+        <div id="${toastId}" class="toast align-items-center ${colorClass}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+          <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      `;
+      let container = document.getElementById('toast-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'position-fixed top-0 end-0 p-3';
+        container.style.zIndex = 1080;
+        document.body.appendChild(container);
       }
+      container.insertAdjacentHTML('beforeend', toastHtml);
+      const toastElement = document.getElementById(toastId);
+      const toast = new bootstrap.Toast(toastElement);
+      toast.show();
+      toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+      });
+    }
+
+    function showConfirm(message, onAccept) {
+      const modalBody = document.getElementById('confirmModalBody');
+      modalBody.textContent = message;
+      const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+      const acceptBtn = document.getElementById('confirmModalAccept');
+      // Remover listeners previos
+      const newAcceptBtn = acceptBtn.cloneNode(true);
+      acceptBtn.parentNode.replaceChild(newAcceptBtn, acceptBtn);
+      newAcceptBtn.addEventListener('click', () => {
+        modal.hide();
+        if (typeof onAccept === 'function') onAccept();
+      });
+      modal.show();
     }
   </script>
+  <!-- Toasts container -->
+  <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
+    <div id="toast-container"></div>
+  </div>
+  <!-- Modal de confirmación -->
+  <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmModalLabel">Confirmar acción</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body" id="confirmModalBody">
+          ¿Seguro que quieres vaciar el carrito?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmModalAccept">Sí, vaciar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
 </body>
 </html>
