@@ -7,7 +7,6 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "init-db": "node src/scripts/initDb.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
